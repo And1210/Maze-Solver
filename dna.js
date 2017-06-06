@@ -38,24 +38,25 @@ DNA.prototype.copy = function() {
 DNA.prototype.cross = function(dna) {
   var out = this.copy();
   for (var i = 0; i < min(out.neurons.length, dna.neurons.length); i++) {
+    var t = dna.neurons[i].copy();
     if (out.neurons[i] == undefined && dna.neurons[i] != undefined) {
-      out.neurons.push(t2);
+      out.neurons.push(t);
     } else if (out.neurons[i] != undefined && dna.neurons[i] != undefined) {
-      var t = dna.neurons[i].copy();
       //Chance of crossover
       if (random() < 0.5) {
         out.neurons[i] = t;
-        for (var row = 0; row < this.sight.x; row++) {
-          for (var col = 0; col < this.sight.y; col++) {
-            out.inputNeurons[row][col] = dna.inputNeurons[row][col].copy();
-            // for (var n = 0; n < out.inputNeurons[row][col].axons.length; n++) {
-            //   if (out.inputNeurons[row][col].axons[n].type != -2 && out.inputNeurons[
-            //       row][col].axons[n] != undefined)
-            //     out.inputNeurons[row][col].axons[n] = out.neurons[n].copy();
-            // }
-          }
-        }
       }
+    }
+  }
+  for (var row = 0; row < this.sight.x; row++) {
+    for (var col = 0; col < this.sight.y; col++) {
+      if (random() < 0.5)
+        out.inputNeurons[row][col] = dna.inputNeurons[row][col].copy();
+      // for (var n = 0; n < out.inputNeurons[row][col].axons.length; n++) {
+      //   if (out.inputNeurons[row][col].axons[n].type != -2 && out.inputNeurons[
+      //       row][col].axons[n] != undefined)
+      //     out.inputNeurons[row][col].axons[n] = out.neurons[n].copy();
+      // }
     }
   }
   // if (random() < 0.5) {
@@ -73,7 +74,7 @@ DNA.prototype.mutate = function() {
         this.neurons.push(new Neuron(1));
       }
       //Chance of mutation
-      if (random() < 0.1) {
+      if (random() < 0.005) {
         var r = random();
         if (r < 0.95) {
           var index = floor(random(this.outputNeurons.length));
@@ -98,7 +99,7 @@ DNA.prototype.mutate = function() {
     }
   } else {
     //Adding a new neuron if none are currently available
-    if (random() < 0.2 && this.neurons.length < 10) {
+    if (random() < 0.1 && this.neurons.length < 10) {
       this.neurons.push(new Neuron(1));
     }
   }
@@ -107,7 +108,7 @@ DNA.prototype.mutate = function() {
   for (var row = 0; row < this.sight.x; row++) {
     for (var col = 0; col < this.sight.y; col++) {
       //Chance of mutation
-      if (random() < 0.2) {
+      if (random() < 0.1) {
         var r = random();
         //Chance of direct link to output
         if (r < 0.5) {

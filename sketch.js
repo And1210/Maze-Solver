@@ -1,5 +1,6 @@
 var maze;
 var generation;
+var running = true;
 var fastForward;
 
 function setup() {
@@ -17,7 +18,8 @@ function draw() {
   maze.render();
 
   generation.render();
-  generation.update();
+  if (running)
+    generation.update();
 }
 
 function init2D(row, col) {

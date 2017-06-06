@@ -10,7 +10,7 @@ function Generation(maze) {
   this.population = 20;
   this.organisms = new Array(this.population);
   for (var i = 0; i < this.population; i++) {
-    this.organisms[i] = new Organism(1, 1, this.maze);
+    this.organisms[i] = new Organism(1, 1, this.maze, i);
   }
   this.current = 0;
   this.stepQueue = [];
@@ -21,12 +21,17 @@ function Generation(maze) {
 }
 
 Generation.prototype.render = function() {
+  var furthest = this.organisms[0].furthest;
+  noStroke();
+  fill(255, 215, 0);
+  rect(furthest.x * this.maze.w, furthest.y * this.maze.w, this.maze.w, this.maze
+    .w);
   this.organisms[this.current].render();
 }
 
 Generation.prototype.update = function() {
   this.organisms[this.current].render();
-  if (millis() > this.updateTimer) {
+  if (millis() >= this.updateTimer) {
     this.updateTimer = millis() + this.delayTime;
 
     if (this.stepQueue.length == 0) {
@@ -50,8 +55,11 @@ Generation.prototype.update = function() {
         for (var col = 0; col < this.organisms[this.current].visited[row].length; col++) {
           if (this.organisms[this.current].visited[row][col] >= this.timeoutMax) {
             timeout = true;
+            break;
           }
         }
+        if (timeout)
+          break;
       }
 
       //If it times out or dies
@@ -59,6 +67,7 @@ Generation.prototype.update = function() {
         .life <= 0 || timeout) {
         this.timeoutFrames = 0;
         this.nextOrganism();
+        console.log(this.current);
       }
     } else if (this.stepIndex < this.stepQueue.length) {
       if (fastForward.checked()) {
@@ -110,10 +119,11 @@ Generation.prototype.setupInputs = function(inputs) {
 }
 
 Generation.prototype.fireInputs = function(inputs) {
-  for (var row = 0; row < this.baseDNA.inputNeurons.length; row++) {
-    for (var col = 0; col < this.baseDNA.inputNeurons[row].length; col++) {
+  for (var row = 0; row < this.organisms[this.current].dna.inputNeurons.length; row++) {
+    for (var col = 0; col < this.organisms[this.current].dna.inputNeurons[row]
+      .length; col++) {
       if (inputs[row][col] == 1) {
-        this.baseDNA.inputNeurons[row][col].fire();
+        this.organisms[this.current].dna.inputNeurons[row][col].fire();
       } else if (inputs[row][col] == 0) {
         // this.baseDNA.inputNeurons[row][col].fireOpposite();
       }
@@ -127,6 +137,9 @@ Generation.prototype.nextOrganism = function() {
   if (this.current >= this.population) {
     this.generationsCompleted++;
     console.log("Generations Completed: " + this.generationsCompleted);
+    for (var i = 0; i < this.organisms.length; i++) {
+      this.organisms[i].calculateFitness();
+    }
     this.crossOver();
     for (var i = 0; i < this.organisms.length; i++) {
       this.organisms[i].reset();
@@ -143,11 +156,15 @@ Generation.prototype.crossOver = function() {
   this.organisms.sort(function(a, b) {
     return b.fitness - a.fitness;
   });
+  //console.log(this.organisms);
 
-  this.baseDNA = this.organisms[0].dna.copy();
-  var s = ceil(this.organisms.length / 2);
-  for (var i = s; i < this.organisms.length; i++) {
-    this.organisms[i].dna = this.organisms[0].dna.cross(this.organisms[i - s]
-      .dna);
-  }
+  // this.baseDNA = this.organisms[0].dna.copy();
+  // var s = ceil(this.organisms.length / 2);
+  // for (var i = s; i < this.organisms.length; i++) {
+  //   this.organisms[i].dna = this.organisms[0]
+  //     .dna.cross(this.organisms[i - s].dna);
+  // }
+  // this.organisms[0].dna = this.baseDNA.copy();
+
+  // running = false;
 }

@@ -1,4 +1,5 @@
-function Organism(row, col, m) {
+function Organism(row, col, m, id) {
+  this.id = id;
   this.m = m;
   this.visited = init2D(this.m.size, this.m.size);
   for (var r = 0; r < this.visited.length; r++) {
@@ -14,10 +15,11 @@ function Organism(row, col, m) {
   this.pos = createVector(row, col);
   this.prevPos = createVector(0, 0);
   this.step = createVector(0, 0);
+  this.furthest = this.start.copy();
 
   this.dna;
   this.fitness = 0;
-  this.life = this.m.size * this.m.w;
+  this.life = this.m.size * this.m.w * 2;
 }
 
 Organism.prototype.update = function() {
@@ -28,7 +30,6 @@ Organism.prototype.update = function() {
     this.pos.add(this.step);
   }
 
-  this.calculateFitness();
   this.life--;
 }
 
@@ -50,12 +51,15 @@ Organism.prototype.setDir = function(c) { //u = up, d = down, l = left, r = righ
 }
 
 Organism.prototype.calculateFitness = function() {
-  this.fitness = 1000 * (1 / (p5.Vector.sub(this.m.finish, this.pos).magSq()));
+  this.fitness = 1000 * (1 / (abs(this.pos.x - this.m.finish.x) + abs(this.pos
+    .y - this.m.finish.y)));
+  this.furthest = this.pos.copy();
 }
 
 Organism.prototype.reset = function() {
   this.pos = this.start.copy();
-  this.life = this.m.size * this.m.w / 2;
+  this.life = this.m.size * this.m.w * 2;
+  this.step = createVector(0, 0);
   for (var r = 0; r < this.visited.length; r++) {
     for (var c = 0; c < this.visited[r].length; c++) {
       this.visited[r][c] = 0;
